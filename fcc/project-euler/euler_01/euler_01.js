@@ -1,10 +1,6 @@
 function isMultiple(num) {
   if (!Number.isInteger(num)) return;
-  if (num % 3 === 0 || num % 5 === 0) {
-    return true;
-  } else {
-    return false;
-  }
+  return num % 3 === 0 || num % 5 === 0;
 }
 
 function rangeSequenceBelow(max) {
@@ -14,25 +10,22 @@ function rangeSequenceBelow(max) {
   return range;
 }
 
-function getAllMultiples(max) {
-  const multiples = rangeSequenceBelow(max).map((num) => {
-    if (isMultiple(num)) {
-      return num;
-    } else {
-      return null;
-    }
+function getAllMultiples(max = 5) {
+  const multiples = rangeSequenceBelow(max).map((value) => {
+    return isMultiple(value) ? value : null;
   });
+
   return multiples.filter(Boolean);
 }
 
 function getSum(array = []) {
-  const sum = array.reduce((acc, next) => acc + next, 0);
-  return sum;
+  const total = array.reduce((accumulator, next) => accumulator + next, 0);
+  return total;
 }
 
-function multiplesOf3and5(num) {
-  const sumAll = getSum(getAllMultiples(num));
-  return sumAll;
+function multiplesOf3and5(number) {
+  const sum = getSum(getAllMultiples(number));
+  return sum;
 }
 
 multiplesOf3and5(1000);
