@@ -6,25 +6,25 @@
 class MyArray:
     def __init__(self):
         self.length = 0
-        self.store = {}
+        self.data = {}
 
     # Time complexity: O(1)
     def get(self):
-        print('self: ', self.store.values())
+        print('self: ', self.data.values())
         return str(self.__dict__)
 
     # Time complexity: O(1)
     def append(self, item):
         self.length += 1
-        self.store[self.length - 1] = item
+        self.data[self.length - 1] = item
 
     # Time complexity: O(1)
     def pop(self):
-        if self.length == 0 or not self.store:
+        if self.length == 0 or not self.data:
             print('array already empty!')
             return
-        removed = self.store[self.length - 1]
-        del self.store[self.length - 1]
+        removed = self.data[self.length - 1]
+        del self.data[self.length - 1]
         self.length -= 1
         return removed
 
@@ -36,9 +36,9 @@ class MyArray:
             raise ValueError('Invalid index range')
 
         for i in range(self.length - 1, index, -1):
-            self.store[i] = self.store[i - 1]
+            self.data[i] = self.data[i - 1]
 
-        self.store[index] = item
+        self.data[index] = item
 
     # Time complexity: O(n)
     def delete(self, index):
@@ -46,10 +46,23 @@ class MyArray:
             raise ValueError('Invalid index range')
 
         for i in range(index, self.length - 1):
-            self.store[i] = self.store[i + 1]
+            self.data[i] = self.data[i + 1]
 
-        del self.store[index]
+        del self.data[index]
         self.length -= 1
+
+    # Time complexity: O(1)
+    def clear(self):
+        self.data.clear()
+        self.length = 0
+
+    # Time complexity: O(1)
+    def is_empty(self):
+        return self.length == 0
+
+    # Time complexity: O(1)
+    def size(self):
+        return self.length
 
 
 if __name__ == "__main__":
@@ -58,5 +71,8 @@ if __name__ == "__main__":
     arr.append('two')
     arr.append('four')
     arr.append('five')
-    # arr.delete(3)
+    arr.delete(3)
+    arr.clear()
+    print(f'Is array empty: {arr.is_empty()}')
+    print(f'Array size: {arr.size()}')
     print(f'array: {arr.get()}')
