@@ -35,16 +35,16 @@ For this problem, we should **stop calling a Service if we get 3 failures (e.g. 
 
 Example requests being made to Service B and Service C:
 
-| Request time | Service / API | Response (status) |
-|---|---|---|
-| 12:01 AM | GET Service B | Success (200) |
-| 12:02 AM | GET Service B | Failed (500) |
-| 12:03 AM | GET Service B | Failed (500) |
-| 12:04 AM | GET Service B | Failed (500) |
-| 12:05 AM | GET Service B | Blocked — not making request to Service B |
-| 12:07 AM | POST Service C | Success (200) |
-| 12:09 AM | GET Service B | Blocked — not making request to Service B |
-| 12:10 AM | GET Service B | Success (200) |
+| Request time | Service / API  | Response (status)                         |
+| ------------ | -------------- | ----------------------------------------- |
+| 12:01 AM     | GET Service B  | Success (200)                             |
+| 12:02 AM     | GET Service B  | Failed (500)                              |
+| 12:03 AM     | GET Service B  | Failed (500)                              |
+| 12:04 AM     | GET Service B  | Failed (500)                              |
+| 12:05 AM     | GET Service B  | Blocked — not making request to Service B |
+| 12:07 AM     | POST Service C | Success (200)                             |
+| 12:09 AM     | GET Service B  | Blocked — not making request to Service B |
+| 12:10 AM     | GET Service B  | Success (200)                             |
 
 The example also shows that circuit-breaker behaviour should be **independent for each downstream service**. Service B can be blocked while Service C continues receiving calls.
 
