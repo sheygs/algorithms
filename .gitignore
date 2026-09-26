@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Maven
+target/
+*.class
+
+# IDE
+.idea/
+*.iml
+
+# Personal notes, not part of the exercise
+Core/Algorithms/PairProgramming/CircuitBreaker/src/main/java/CircuitBreaker/architecture/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
