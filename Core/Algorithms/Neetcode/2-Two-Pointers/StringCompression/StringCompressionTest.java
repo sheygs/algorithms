@@ -1,4 +1,4 @@
-package GoldmanSach.StringCompression;
+package GoldmanSachs.StringCompression;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

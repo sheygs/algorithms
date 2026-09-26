@@ -1,4 +1,4 @@
-package GoldmanSach.TrappingRainWater;
+package GoldmanSachs.TrappingRainWater;
 
 
 public class TrappingRainWater {

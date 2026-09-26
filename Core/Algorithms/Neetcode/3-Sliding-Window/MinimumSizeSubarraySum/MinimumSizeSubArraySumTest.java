@@ -1,4 +1,4 @@
-package GoldmanSach.MinimumSizeSubArraySum;
+package GoldmanSachs.MinimumSizeSubArraySum;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

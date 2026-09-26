@@ -1,4 +1,4 @@
-package GoldmanSach.MinimumSizeSubArraySum;
+package GoldmanSachs.MinimumSizeSubArraySum;
 
 public class MinimumSizeSubArraySum {
     /**

@@ -8,37 +8,12 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.practice</groupId>
+    <parent>
+        <groupId>com.practice</groupId>
+        <artifactId>pair-programming</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
     <artifactId>currency-converter</artifactId>
-    <version>1.0-SNAPSHOT</version>
-
-    <properties>
-        <maven.compiler.release>25</maven.compiler.release>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
-    <dependencies>
-
-        <!-- JUnit 5 -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.11.4</version>
-            <scope>test</scope>
-        </dependency>
-
-    </dependencies>
-
-    <build>
-        <plugins>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.2</version>
-            </plugin>
-
-        </plugins>
-    </build>
 
 </project>

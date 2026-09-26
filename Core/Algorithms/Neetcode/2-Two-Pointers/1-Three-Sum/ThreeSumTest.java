@@ -1,5 +1,5 @@
 
-package GoldmanSach.ThreeSum;
+package GoldmanSachs.ThreeSum;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

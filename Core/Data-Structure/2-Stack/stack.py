@@ -23,7 +23,6 @@ class CustomStack:
             raise ValueError("stack is empty")
         return self.array.pop()
 
-    # get the value of the top element without removing it
     # Time Complexity: O(1)
     def peek(self):
         if self.is_empty():
@@ -31,7 +30,7 @@ class CustomStack:
         last_index = len(self.array) - 1
         return self.array[last_index]
 
-    # log elements in reverse order following LIFO principle
+    # reversed to reflect LIFO order (most recently pushed first)
     # Time Complexity: O(n)
     def log(self):
         return [self.array[i] for i in range(len(self.array) - 1, -1, -1)]
@@ -43,5 +42,4 @@ if __name__ == "__main__":
     my_stack.push("3")
     my_stack.push("1")
     print("peeked: ", my_stack.peek())
-    # my_stack.pop()
     print(f"elements left: {my_stack.log()}")

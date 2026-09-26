@@ -1,4 +1,4 @@
-package GoldmanSach.MinimumInRotatedSortedArray;
+package GoldmanSachs.MinimumInRotatedSortedArray;
 
 public class MinimumInRotatedSortedArray {
     /**

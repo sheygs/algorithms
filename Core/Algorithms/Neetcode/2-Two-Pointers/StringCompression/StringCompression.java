@@ -1,4 +1,4 @@
-package GoldmanSach.StringCompression;
+package GoldmanSachs.StringCompression;
 
 public class StringCompression {
 

@@ -70,7 +70,63 @@ class TransferService {
             return transferResult;
         }
 
-        // basic argument validation
+        validateTransferInputs(senderId, recipientId, amount, sourceCurrency, targetCurrency);
+
+        User sender = requireUser(senderId, "sender");
+        User recipient = requireUser(recipientId, "recipient");
+
+        Account senderAccount = requireAccount(
+                sender, sourceCurrency, "sender does not have the source currency account");
+        Account recipientAccount = requireAccount(
+                recipient, targetCurrency, "recipient does not have the target currency account");
+
+        requireSufficientFunds(senderAccount, amount);
+
+        /**
+         *  Complete the transfer without calling the exchange rate provider
+         *  when the source currency is the same as the target currency except otherwise
+         */
+        BigDecimal convertedAmount = amount;
+        boolean isDifferentCurrency = !sourceCurrency.equals(targetCurrency);
+        BigDecimal rate = BigDecimal.ONE;
+
+        if (isDifferentCurrency) {
+            rate = resolveRate(sourceCurrency, targetCurrency);
+            // Perform the conversion using the full precision of the
+            // exchange rate. Rounding is applied to the resulting money
+            // amount, not to the exchange rate.
+            convertedAmount = amount.multiply(rate);
+        }
+
+        convertedAmount = applyTargetCurrencyPrecision(convertedAmount, targetCurrency);
+
+        // side effects only happen after prerequisites succeed
+        senderAccount.debit(amount);
+        recipientAccount.credit(convertedAmount);
+
+        transferResult = new TransferResult(
+                transferId,
+                TransferStatus.SUCCESS,
+                amount,
+                sourceCurrency,
+                convertedAmount,
+                targetCurrency,
+                rate
+        );
+
+        completedTransfers.put(transferId, transferResult);
+
+        return transferResult;
+    }
+
+    // basic argument validation
+    private void validateTransferInputs(
+            String senderId,
+            String recipientId,
+            BigDecimal amount,
+            String sourceCurrency,
+            String targetCurrency) {
+
         if (senderId == null || senderId.isBlank()) {
             throw new IllegalArgumentException("invalid senderId");
         }
@@ -99,90 +155,45 @@ class TransferService {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("amount must be greater than zero");
         }
+    }
 
-        // entity existence validation
-        User sender = this.userRepository.findById(senderId);
-        if (sender == null) {
-            throw new IllegalArgumentException("sender does not exist");
+    // entity existence validation
+    private User requireUser(String userId, String role) {
+        User user = userRepository.findById(userId);
+        if (user == null) {
+            throw new IllegalArgumentException(role + " does not exist");
         }
+        return user;
+    }
 
-        User recipient = this.userRepository.findById(recipientId);
-        if (recipient == null) {
-            throw new IllegalArgumentException("recipient does not exist");
+    // domain state validation
+    private Account requireAccount(User user, String currency, String missingAccountMessage) {
+        Account account = user.getAccount(currency);
+        if (account == null) {
+            throw new IllegalStateException(missingAccountMessage);
         }
+        return account;
+    }
 
-        // domain state validation
-        Account senderAccount = sender.getAccount(sourceCurrency);
-        if (senderAccount == null) {
-            throw new IllegalStateException("sender does not have the source currency account");
-        }
-
-        Account recipientAccount = recipient.getAccount(targetCurrency);
-        if (recipientAccount == null) {
-            throw new IllegalStateException("recipient does not have the target currency account");
-        }
-
-        BigDecimal senderAccountBalance = senderAccount.getBalance();
-        if (senderAccountBalance.compareTo(amount) < 0) {
+    private void requireSufficientFunds(Account senderAccount, BigDecimal amount) {
+        if (senderAccount.getBalance().compareTo(amount) < 0) {
             throw new IllegalStateException("insufficient funds");
         }
+    }
 
-        /**
-         *  Complete the transfer without calling the exchange rate provider
-         *  when the source currency is the same as the target currency except otherwise
-         */
-        BigDecimal convertedAmount = amount;
-        boolean isDifferentCurrency = !sourceCurrency.equals(targetCurrency);
-        BigDecimal rate = BigDecimal.ONE;
-
-        if (isDifferentCurrency) {
-            rate = resolveRate(sourceCurrency, targetCurrency);
-            // Perform the conversion using the full precision of the
-            // exchange rate. Rounding is applied to the resulting money
-            // amount, not to the exchange rate.
-            convertedAmount = amount.multiply(rate);
-        }
-
-        // ------------------------------------------------------------
-        // Apply the target currency's monetary precision.
-        // ------------------------------------------------------------
-
-        // Determine how many fractional digits the target currency supports.
-        // For example:
-        // EUR / GBP -> 2 decimal places
-        // JPY       -> 0 decimal places
-        Currency currency = Currency.getInstance(targetCurrency);
-
-        int scale = currency.getDefaultFractionDigits();
-
-        // Round the final amount that will actually be credited.
-        // HALF_EVEN is the rounding policy chosen for this practice version.
-        //
-        // This happens after conversion so that the exchange rate retains
-        // its full precision, and before account balances are modified.
-        convertedAmount = convertedAmount.setScale(
-                scale,
-                RoundingMode.HALF_EVEN
-        );
-
-        // side effects only happen after prerequisites succeed
-        // same currency, perform normal transfer
-        senderAccount.debit(amount);
-        recipientAccount.credit(convertedAmount);
-
-        transferResult = new TransferResult(
-                transferId,
-                TransferStatus.SUCCESS,
-                amount,
-                sourceCurrency,
-                convertedAmount,
-                targetCurrency,
-                rate
-        );
-
-        completedTransfers.put(transferId, transferResult);
-
-        return transferResult;
+    // Determine how many fractional digits the target currency supports.
+    // For example:
+    // EUR / GBP -> 2 decimal places
+    // JPY       -> 0 decimal places
+    //
+    // Round the final amount that will actually be credited.
+    // HALF_EVEN is the rounding policy chosen for this practice version.
+    //
+    // This happens after conversion so that the exchange rate retains
+    // its full precision, and before account balances are modified.
+    private BigDecimal applyTargetCurrencyPrecision(BigDecimal amount, String targetCurrency) {
+        int scale = Currency.getInstance(targetCurrency).getDefaultFractionDigits();
+        return amount.setScale(scale, RoundingMode.HALF_EVEN);
     }
 
     private BigDecimal resolveRate(String sourceCurrency, String targetCurrency) {
@@ -231,103 +242,3 @@ class TransferService {
         return user.getAccount(currency).getBalance();
     }
 }
-
-
-// ---------- Existing domain code ----------
-
-class User {
-    private final Map<String, Account> accounts = new HashMap<>();
-
-    public User(String id) {
-    }
-
-    public Account getAccount(String currency) {
-        return accounts.get(currency);
-    }
-
-    public void addAccount(Account account) {
-        accounts.put(account.getCurrency(), account);
-    }
-}
-
-
-class Account {
-
-    private final String currency;
-    private BigDecimal balance;
-
-    public Account(String currency, BigDecimal balance) {
-        this.currency = currency;
-        this.balance = balance;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public BigDecimal getBalance() {
-        return balance;
-    }
-
-    public void debit(BigDecimal amount) {
-        balance = balance.subtract(amount);
-    }
-
-    public void credit(BigDecimal amount) {
-        balance = balance.add(amount);
-    }
-}
-
-
-// ---------- Supplied dependencies ----------
-
-interface UserRepository {
-    // Returns null when the user does not exist.
-    User findById(String userId);
-}
-
-
-interface ExchangeRateProvider {
-    // Treat this as a supplied external API.
-    BigDecimal getRate(String from, String to) throws ExchangeRateException;
-}
-
-
-// ------ currency pair  --------
-record CurrencyPair(String fromCurrency, String toCurrency) {
-}
-
-// ----- cached rate ----------
-record CachedRate(BigDecimal rate, Instant expiresAt) {
-}
-
-
-// ---- transfer result ----------
-record TransferResult(
-        String transferId,
-        TransferStatus status,
-        BigDecimal sentAmount,
-        String sourceCurrency,
-        BigDecimal receivedAmount,
-        String targetCurrency,
-        BigDecimal exchangeRate) {
-}
-
-// ----- transfer status ---------
-enum TransferStatus {
-    SUCCESS
-}
-
-// ----- exception -----------
-class ExchangeRateException extends RuntimeException {
-
-    public ExchangeRateException(String message) {
-        super(message);
-    }
-
-    public ExchangeRateException(String message, Throwable cause) {
-        super(message, cause);
-    }
-}
-
-

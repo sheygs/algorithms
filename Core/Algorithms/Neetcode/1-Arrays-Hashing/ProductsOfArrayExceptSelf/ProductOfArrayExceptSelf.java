@@ -1,4 +1,4 @@
-package GoldmanSach.ProductOfArrayExceptSelf;
+package GoldmanSachs.ProductOfArrayExceptSelf;
 
 import java.util.Arrays;
 

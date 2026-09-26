@@ -1,4 +1,4 @@
-package TokenManager.TokenManager;
+package TokenManager;
 
 import java.time.Instant;
 import java.util.Objects;

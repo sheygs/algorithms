@@ -1,4 +1,4 @@
-package GoldmanSach.ThreeSum;
+package GoldmanSachs.ThreeSum;
 
 import java.util.ArrayList;
 import java.util.Arrays;

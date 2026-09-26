@@ -1,5 +1,5 @@
 
-package GoldmanSach.TrappingRainWater;
+package GoldmanSachs.TrappingRainWater;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
